@@ -1,0 +1,20 @@
+body {
+    background-color: black;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  #pong {
+    background-color: black;
+    display: block;
+    margin: 0 auto;
+  }
+  
+  canvas {
+    border: 1px solid white;
+  }
+  

@@ -1,0 +1,109 @@
+// Get the canvas element
+const canvas = document.getElementById("pong");
+const context = canvas.getContext("2d");
+
+// Set up the game constants
+const WIDTH = canvas.width;
+const HEIGHT = canvas.height;
+const PADDLE_WIDTH = 10;
+const PADDLE_HEIGHT = 60;
+const PLAYER_PADDLE_X = 20;
+const COMPUTER_PADDLE_X = WIDTH - PADDLE_WIDTH - 20;
+let player_paddle_y = HEIGHT / 2 - PADDLE_HEIGHT / 2;
+let computer_paddle_y = HEIGHT / 2 - PADDLE_HEIGHT / 2;
+let player_score = 0;
+let computer_score = 0;
+
+// Set up the ball
+const BALL_RADIUS = 10;
+let ball_x = WIDTH / 2;
+let ball_y = HEIGHT / 2;
+let ball_speed_x = (Math.random() > 0.5 ? 1 : -1) * 3;
+let ball_speed_y = (Math.random() > 0.5 ? 1 : -1) * 3;
+
+// Draw the paddles, ball, and scores
+function draw() {
+    // Clear the canvas
+    context.fillStyle = "black";
+    context.fillRect(0, 0, WIDTH, HEIGHT);
+
+    // Draw the paddles
+    context.fillStyle = "white";
+    context.fillRect(PLAYER_PADDLE_X, player_paddle_y, PADDLE_WIDTH, PADDLE_HEIGHT);
+    context.fillRect(COMPUTER_PADDLE_X, computer_paddle_y, PADDLE_WIDTH, PADDLE_HEIGHT);
+
+    // Draw the ball
+    context.beginPath();
+    context.arc(ball_x, ball_y, BALL_RADIUS, 0, Math.PI * 2, false);
+    context.fillStyle = "white";
+    context.fill();
+    context.closePath();
+
+    // Draw the scores
+    context.fillStyle = "white";
+    context.font = "20px Arial";
+    context.fillText("Player: " + player_score, 20, 30);
+    context.fillText("Computer: " + computer_score, WIDTH - 140, 30);
+}
+
+// Update the game state
+function update() {
+    // Move the player's paddle
+    document.addEventListener("keydown", function (event) {
+        if (event.keyCode === 38 && player_paddle_y > 0) {
+            player_paddle_y -= 5;
+        } else if (event.keyCode === 40 && player_paddle_y < HEIGHT - PADDLE_HEIGHT) {
+            player_paddle_y += 5;
+        }
+    });
+
+    // Move the computer's paddle
+    if (computer_paddle_y + PADDLE_HEIGHT / 2 < ball_y && computer_paddle_y < HEIGHT - PADDLE_HEIGHT) {
+        computer_paddle_y += 3;
+    } else if (computer_paddle_y + PADDLE_HEIGHT / 2 > ball_y && computer_paddle_y > 0) {
+        computer_paddle_y -= 3;
+    }
+
+    // Move the ball
+    ball_x += ball_speed_x;
+    ball_y += ball_speed_y;
+
+    // Handle ball collisions with walls
+    if (ball_y - BALL_RADIUS < 0 || ball_y + BALL_RADIUS > HEIGHT) {
+        ball_speed_y *= -1;
+    }
+
+    // Handle ball collisions with paddles
+    if (ball_x - BALL_RADIUS < PLAYER_PADDLE_X + PADDLE_WIDTH && player_paddle_y <= ball_y && ball_y <= player_paddle_y + PADDLE_HEIGHT) {
+        ball_speed_x *= -1;
+    } else if (ball_x + BALL_RADIUS > COMPUTER_PADDLE_X && computer_paddle_y <= ball_y && ball_y <= computer_paddle_y + PADDLE_HEIGHT) {
+        ball_speed_x *= -1;
+    }
+
+    // Handle ball going out of bounds
+    if (ball_x - BALL_RADIUS < 0) {
+        computer_score++;
+        resetBall();
+    } else if (ball_x + BALL_RADIUS > WIDTH) {
+        player_score++;
+        resetBall();
+    }
+}
+
+// Reset the ball position and speed
+function resetBall() {
+    ball_x = WIDTH / 2;
+    ball_y = HEIGHT / 2;
+    ball_speed_x = (Math.random() > 0.5 ? 1 : -1) * 3;
+    ball_speed_y = (Math.random() > 0.5 ? 1 : -1) * 3;
+}
+
+// Game loop
+function gameLoop() {
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+// Start the game loop
+gameLoop();
